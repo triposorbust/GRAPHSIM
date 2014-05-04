@@ -90,27 +90,36 @@ static State _trans(double *mat, State curr, double cont)
   double p = ((double) rand() / (double) RAND_MAX);
 
   double ps = _prob(mat, curr, STATE_SUSC);
+  double pe = _prob(mat, curr, STATE_EXP);
   double pi = _prob(mat, curr, STATE_INF);
+  double pq = _prob(mat, curr, STATE_QUAR);
   double pr = _prob(mat, curr, STATE_REM);
 
-  /* TODO: Will need to update these to accommodate other models. */
   if (STATE_SUSC == curr) {
-
-    assert(0.0 == pr);
-    if (p < pi * cont)
-      next = STATE_INF;
-
-  } 
+    assert(0.0 == pr && 0.0 == pq);
+    if      (pe != 0.0 && p < pe      * cont) next = STATE_EXP;
+    else if (pi != 0.0 && p < (pi+pe) * cont) next = STATE_INF;
+  }
+  if (STATE_EXP == curr) {
+    if      (ps != 0.0 && p < ps)          next = STATE_SUSC;
+    else if (pi != 0.0 && p < ps+pi)       next = STATE_INF;
+    else if (pq != 0.0 && p < ps+pi+pq)    next = STATE_QUAR;
+    else if (pr != 0.0 && p < ps+pi+pq+pr) next = STATE_REM;
+  }
   if (STATE_INF == curr) {
-
-    assert(0.0 == ps);
-    if (p < pr)
-      next = STATE_REM;
+    if      (ps != 0.0 && p < ps)          next = STATE_SUSC;
+    else if (pe != 0.0 && p < ps+pe)       next = STATE_EXP;
+    else if (pq != 0.0 && p < ps+pe+pq)    next = STATE_QUAR;
+    else if (pr != 0.0 && p < ps+pe+pq+pr) next = STATE_REM;
+  }
+  if (STATE_QUAR == curr) {
+    if      (ps != 0.0 && p < ps)          next = STATE_SUSC;
+    else if (pe != 0.0 && p < ps+pe)       next = STATE_EXP;
+    else if (pi != 0.0 && p < ps+pe+pi)    next = STATE_INF;
+    else if (pr != 0.0 && p < ps+pe+pi+pr) next = STATE_REM;
   }
   if (STATE_REM == curr) {
-
     assert(1.0 == pr);
-
   }
   return next;
 }
@@ -267,11 +276,23 @@ void simulate(struct SimSpec *s_spec, struct Result **p_res)
   int n_steps  = 0, max_steps  = s_spec->max_steps;
   int n_static = 0, max_static = s_spec->term_cond;
   int delta;
+
+  int i,cases;
+  State st;
+
   while (n_steps <= max_steps && (-1 == max_static || n_static < max_static)) {
     delta = _step(threads, t_specs, &results, n_threads, graph_sz);
     if (delta) n_static  = 0;
     else       n_static += 1;
     n_steps += 1;
+
+    cases = 0;
+    for (i=0; i<graph_sz; ++i) {
+      st = results->state[i];
+      if (STATE_EXP == st || STATE_INF == st)
+        cases += 1;
+    }
+    if (0 == cases) break;
   }
 
   free(t_specs);

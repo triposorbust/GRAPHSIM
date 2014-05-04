@@ -35,12 +35,14 @@
 #include "graph.h"
 #endif
 
-#define N_STATES 3
+#define N_STATES 5
 
 typedef enum {
   STATE_SUSC=0,
-  STATE_INF=1,
-  STATE_REM=2
+  STATE_EXP=1,
+  STATE_INF=2,
+  STATE_QUAR=3,
+  STATE_REM=4
 } State;
 
 typedef void * SPEC_P;
