@@ -1,6 +1,11 @@
 #ifndef __GRAPH_H__
 #define __GRAPH_H__
 
+#ifndef __ASSERT_H_
+#define __ASSERT_H__
+#include <assert.h>
+#endif
+
 #ifndef __STDLIB_H__
 #define __STDLIB_H__
 #include <stdlib.h>
@@ -11,9 +16,9 @@
 #include <stdio.h>
 #endif
 
-#ifndef __ASSERT_H_
-#define __ASSERT_H__
-#include <assert.h>
+#ifndef __STRING_H__
+#define __STRING_H__
+#include <string.h>
 #endif
 
 typedef void * GRAPH_P;

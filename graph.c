@@ -71,14 +71,10 @@ void neighbours(GRAPH_P ptr, int v, int *ns, double *wts, int n)
 {
   struct Graph *G = (struct Graph *) ptr;
   struct Edge *us = G->vertices[v];
+  memset((void *) ns,  0xff, n * sizeof(int));
+  memset((void *) wts, 0x00, n * sizeof(double));
 
-  int i;
-  for (i=0; i<n; ++i) {
-    ns[i] = -1;
-    wts[i] = 0.0;
-  }
-
-  i = 0;
+  int i = 0;
   while (NULL != us && i < n) {
     wts[i] = us->weight;
     ns[i] = us->dest;

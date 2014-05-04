@@ -68,10 +68,14 @@ void clean_spec(SPEC_P *ptr)
  *
  */
 
+static double _prob(double *mat, State s, State t)
+{
+  return mat[N_STATES * s + t];
+}
+
 struct ThreadSpec {
   GRAPH_P graph;
   SPEC_P spec;
-  int seed;
 
   State *prev;
   State *next;
@@ -80,20 +84,69 @@ struct ThreadSpec {
   int stop;
 };
 
+static State _trans(double *mat, State curr, double cont)
+{
+  State next = curr;
+  double p = ((double) rand() / (double) RAND_MAX);
+
+  double ps = _prob(mat, curr, STATE_SUSC);
+  double pi = _prob(mat, curr, STATE_INF);
+  double pr = _prob(mat, curr, STATE_REM);
+
+  /* TODO: Will need to update these to accommodate other models. */
+  if (STATE_SUSC == curr) {
+
+    assert(0.0 == pr);
+    if (p < pi * cont)
+      next = STATE_INF;
+
+  } 
+  if (STATE_INF == curr) {
+
+    assert(0.0 == ps);
+    if (p < pr)
+      next = STATE_REM;
+  }
+  if (STATE_REM == curr) {
+
+    assert(1.0 == pr);
+
+  }
+  return next;
+}
+
 static void *_run(void *ptr)
 {
   struct ThreadSpec *spec = (struct ThreadSpec *) ptr;
+  double * matrix = (double *) spec->spec;
 
-  /* Do some work here. */
-  spec = 0x0;
+  int sz = graph_size(spec->graph);
+  int *us = (int *) malloc(sizeof(int) * sz);
+  double *ws = (double *) malloc(sizeof(double) * sz);
 
+  int i,v,start,stop;
+  start = spec->start;
+  stop  = spec->stop;
+  double cont = 0.0;
+  for (v=start; v<=stop; ++v) {
+    neighbours(spec->graph, v, us, ws, sz);
+    for (i=0; i<sz; ++i) {
+      if (-1 == us[i]) break;
+      if (STATE_INF == spec->prev[us[i]]) {
+        cont += ws[i];
+      }
+    }
+    spec->next[v] = _trans(matrix, spec->prev[v], cont);
+  }
+
+  free(ws);
+  free(us);
   pthread_exit(NULL);
 }
 
 static void set_specs(struct ThreadSpec *specs,
                       GRAPH_P graph,
                       SPEC_P spec,
-                      int seed,
                       int n)
 {
   int graph_sz   = graph_size(graph);
@@ -110,7 +163,7 @@ static void set_specs(struct ThreadSpec *specs,
     specs[i].start = i * per_thread;
     specs[i].stop  = specs[i].start + per_thread - 1;
   }
-  specs[i].stop = graph_sz - 1;
+  specs[n-1].stop = graph_sz - 1;
 }
 
 static void push_state(struct Result **p_res, int sz)
@@ -203,9 +256,12 @@ void simulate(struct SimSpec *s_spec, struct Result **p_res)
   int n_threads = s_spec->n_threads;
   int graph_sz = graph_size(s_spec->graph);
 
+  if (-1 == s_spec->prng_seed) srand(time(NULL));
+  else srand((unsigned int) s_spec->prng_seed);
+
   t_specs = (struct ThreadSpec *) malloc(sizeof(struct ThreadSpec)*n_threads);
   threads = (pthread_t *)  malloc(sizeof(pthread_t) * n_threads);
-  set_specs(t_specs,s_spec->graph,s_spec->spec,s_spec->prng_seed,n_threads);
+  set_specs(t_specs,s_spec->graph,s_spec->spec,n_threads);
   set_state(&results, graph_sz, s_spec->init_set);
 
   int n_steps  = 0, max_steps  = s_spec->max_steps;

@@ -16,6 +16,11 @@
 #include <stdlib.h>
 #endif
 
+#ifndef __STDIO_H__
+#define __STDIO_H__
+#include <stdio.h>
+#endif
+
 #ifndef __PTHREAD_H__
 #define __PTHREAD_H__
 #include <pthread.h>
@@ -35,7 +40,7 @@
 typedef enum {
   STATE_SUSC=0,
   STATE_INF=1,
-  STATE_RES=2
+  STATE_REM=2
 } State;
 
 typedef void * SPEC_P;
