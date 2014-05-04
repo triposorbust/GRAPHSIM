@@ -31,21 +31,22 @@ void dump(struct Result *res, char *fn, int sz)
     }
   }
 
-  int i;
+  int i,tot;
   fprintf(fd,"N,");
   for (i=0; i<sz; ++i) {
-    fprintf(fd, "%d", i);
-    if (i != sz-1) fprintf(fd, ",");
-    else fprintf(fd, "\n");
+    fprintf(fd, "%d,", i);
   }
+  fprintf(fd, "TOT,FRAC\n");
 
   while (NULL != res) {
+    tot = 0;
     fprintf(fd, "%d,", res->index);
     for (i=0; i<sz; ++i) {
-      fprintf(fd, "%d", res->state[i]);
-      if (i != sz-1) fprintf(fd, ",");
-      else fprintf(fd, "\n");
+      fprintf(fd, "%d,", res->state[i]);
+      if (STATE_INF == res->state[i])
+        tot += 1;
     }
+    fprintf(fd, "%d,%5.3f\n", tot, (float) tot/(float) sz);
     res = res->next;
   }
 

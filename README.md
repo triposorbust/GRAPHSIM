@@ -95,4 +95,5 @@ Most of the behaviour of the simulation is specified instead through the require
 ### License
 
 This software is distributed under the MIT License.
+
 Copyright &copy; 2014 Andy Chiang (Columbia University).
