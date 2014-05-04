@@ -267,7 +267,7 @@ void simulate(struct SimSpec *s_spec, struct Result **p_res)
   int n_steps  = 0, max_steps  = s_spec->max_steps;
   int n_static = 0, max_static = s_spec->term_cond;
   int delta;
-  while (n_steps <= max_steps && n_static < max_static) {
+  while (n_steps <= max_steps && (-1 == max_static || n_static < max_static)) {
     delta = _step(threads, t_specs, &results, n_threads, graph_sz);
     if (delta) n_static  = 0;
     else       n_static += 1;

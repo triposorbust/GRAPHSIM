@@ -13,7 +13,7 @@ static const char *DESCRIPTIONS[] = {
   "Pseudo-random number generator seed. (dflt: ~time~)",
   "Adds node to vertex subset zero. (dflt: ~rand~)",
   "Maximum number of simulation steps. (dflt: 100)",
-  "Fixed point termination condition. (dflt: 25)",
+  "Fixed point termination condition. (dflt: -1)",
   "File to output results. (dflt: ~stdout~)"
 };
 
@@ -59,7 +59,7 @@ void init_options(void ***pointer)
   * (int *) options[OPTION_STEPS] = 100;
 
   options[OPTION_TERM] = (int *) malloc(sizeof(int));
-  * (int *) options[OPTION_TERM] = 25;
+  * (int *) options[OPTION_TERM] = -1;
 
   options[OPTION_OUTPUT] = (char *) malloc(STR_BUFFER_SIZE * sizeof(char));
   bzero((void *) options[OPTION_OUTPUT], STR_BUFFER_SIZE * sizeof(char));
