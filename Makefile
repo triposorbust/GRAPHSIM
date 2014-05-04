@@ -1,5 +1,5 @@
 CC = gcc
-CCFLAGS = -g -Wall -I/usr/local/include -L/usr/local/lib
+CCFLAGS = -ansi -Wall -Wextra -Os
 
 BINARY = graphsim
 OBJECTS = graph.o simulate.o parser.o main.o
